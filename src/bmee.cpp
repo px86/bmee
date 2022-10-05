@@ -28,13 +28,13 @@ auto lex(const std::string &src) -> std::vector<Token>
       {
 	if (isdigit(src.at(i))) {
 	  size_t start = i, span = 1;
-          for (size_t pos = start + span;
+	  for (size_t pos = start + span;
 	       pos < src.size() && (isdigit(src.at(pos)) || src.at(pos) == '.');
 	       ++span, ++pos
 	       );
 	  tokens.push_back(Token(Token::Type::NUMBER, start,
 				 std::stod(src.substr(start, span))));
-          i += span - 1;
+	  i += span - 1;
 	} else {
 	  std::cerr << "Unknow token at position: " << i << std::endl;
 	  std::exit(EXIT_FAILURE);
@@ -43,6 +43,7 @@ auto lex(const std::string &src) -> std::vector<Token>
     }
   }
 #undef emit_token
+
   return tokens;
 }
 
@@ -84,35 +85,29 @@ auto Parser::parse_expression() -> Operation *
   default:
     {
       auto term = parse_term();
-      if (empty()) {
-	return term;
-      } else {
-	switch (peek().type) {
-        case Token::Type::PLUS:
-	  {
-	    consume();
-	    Addition *addition = new Addition();
-	    addition->left = term;
-	    addition->right = parse_expression();
-	    return addition;
-	  }
-	case Token::Type::MINUS:
-	  {
-	    consume();
-	    Subtraction *subtraction = new Subtraction();
-	    subtraction->left = term;
-	    subtraction->right = parse_expression();
-	    return subtraction;
-	  }
-	default:
-	  return term;
-      }
-      }
+      if (empty()) return term;
 
+      switch (peek().type) {
+      case Token::Type::PLUS:
+	{
+	  consume();
+	  Addition *addition = new Addition();
+	  addition->left = term;
+	  addition->right = parse_expression();
+	  return addition;
+	}
+      case Token::Type::MINUS:
+	{
+	  consume();
+	  Subtraction *subtraction = new Subtraction();
+	  subtraction->left = term;
+	  subtraction->right = parse_expression();
+	  return subtraction;
+	}
+      default: return term;
+      }
     }
-
   }
-  return nullptr;
 }
 
 auto Parser::parse_term() -> Operation *
@@ -137,11 +132,8 @@ auto Parser::parse_term() -> Operation *
       division->right = parse_expression();
       return division;
     }
-    default:
-      return factor;
+  default: return factor;
   }
-
-  return nullptr;
 }
 
 auto Parser::parse_factor() -> Operation *
@@ -162,13 +154,12 @@ auto Parser::parse_factor() -> Operation *
       num->value = consume().value;
       return num;
     }
-  default: {
+  default:
+    {
       std::cerr << "Factor: Unexpected token encountered!\n";
       std::exit(EXIT_FAILURE);
     }
   }
-
-  return nullptr;
 }
 
 auto Parser::parse() -> std::unique_ptr<Operation>
@@ -176,7 +167,7 @@ auto Parser::parse() -> std::unique_ptr<Operation>
   auto expr = parse_expression();
   if (!empty()) {
     std::cerr << "Unexpected token at: " << peek().position << std::endl;
-    std::exit(1);
+    std::exit(EXIT_FAILURE);
   }
   return std::unique_ptr<Operation>(expr);
 }
@@ -193,7 +184,10 @@ auto evaluate(const std::unique_ptr<Operation> &opr) -> double
 auto Parser::expect(Token::Type type) -> bool
 {
   if (peek().type != type) {
-    return false;
+    std::cerr << "Expected " << token_type_str(type) << ", found "
+              << token_type_str(peek().type) << " at " << peek().position
+              << std::endl;
+    std::exit(EXIT_FAILURE);
   }
   return true;
 }
