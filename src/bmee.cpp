@@ -64,6 +64,10 @@ auto token_type_str(Token::Type t) -> const char *
 
 auto Parser::parse_expression() -> Operation *
 {
+  if (empty()) {
+    std::cerr << "Error: no more tokens to parse" << std::endl;
+    std::exit(EXIT_FAILURE);
+  }
   auto tok = peek();
   switch (tok.type) {
   case Token::Type::PLUS:
@@ -138,6 +142,10 @@ auto Parser::parse_term() -> Operation *
 
 auto Parser::parse_factor() -> Operation *
 {
+  if (empty()) {
+    std::cerr << "Error: no more tokens to parse" << std::endl;
+    std::exit(EXIT_FAILURE);
+  }
   auto tok = peek();
   switch (tok.type) {
   case Token::Type::LEFT_PAREN:
