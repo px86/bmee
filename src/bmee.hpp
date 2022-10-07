@@ -72,11 +72,13 @@ private:
 class Operation {
 public:
   virtual double evaluate() = 0;
+  virtual ~Operation() = default;
 };
 
 class Addition : public Operation {
 public:
   double evaluate() { return left->evaluate() + right->evaluate(); };
+  ~Addition() { delete left; delete right; }
   Operation *left;
   Operation *right;
 };
@@ -84,6 +86,7 @@ public:
 class Subtraction : public Operation {
 public:
   double evaluate() { return left->evaluate() - right->evaluate(); };
+  ~Subtraction() { delete left; delete right; }
   Operation *left;
   Operation *right;
 };
@@ -91,6 +94,7 @@ public:
 class Multiplication : public Operation {
 public:
   double evaluate() { return left->evaluate() * right->evaluate(); };
+  ~Multiplication() { delete left; delete right; }
   Operation *left;
   Operation *right;
 };
@@ -98,6 +102,7 @@ public:
 class Division : public Operation {
 public:
   double evaluate() { return left->evaluate() / right->evaluate(); };
+  ~Division() { delete left; delete right; }
   Operation *left;
   Operation *right;
 };
@@ -107,6 +112,7 @@ public:
   double evaluate() {
     return (std::uint64_t)left->evaluate() % (std::uint64_t)right->evaluate();
   };
+  ~Modulo() { delete left; delete right; }
   Operation *left;
   Operation *right;
 };
@@ -114,17 +120,20 @@ public:
 class UnaryPlus : public Operation {
 public:
   double evaluate() { return right->evaluate(); }
+  ~UnaryPlus() { delete right; }
   Operation *right;
 };
 
 class UnaryMinus : public Operation {
 public:
   double evaluate() { return -1 * right->evaluate(); }
+  ~UnaryMinus() { delete right; }
   Operation *right;
 };
 
 class Number : public Operation {
 public:
   double evaluate() { return value; }
+  ~Number() = default;
   double value;
 };
