@@ -62,7 +62,7 @@ auto token_type_str(Token::Type t) -> const char *
   return "UNKNOWN_TOKEN";
 }
 
-auto Parser::parse_expression() -> Operation *
+auto Parser::parse_expression() -> Node *
 {
   if (empty()) {
     std::cerr << "Error: no more tokens to parse" << std::endl;
@@ -114,7 +114,7 @@ auto Parser::parse_expression() -> Operation *
   }
 }
 
-auto Parser::parse_term() -> Operation *
+auto Parser::parse_term() -> Node *
 {
   auto factor = parse_factor();
   if (empty()) return factor;
@@ -136,11 +136,19 @@ auto Parser::parse_term() -> Operation *
       division->right = parse_expression();
       return division;
     }
+  case Token::Type::MODULO:
+    {
+      consume();
+      Modulo *modulo = new Modulo();
+      modulo->left = factor;
+      modulo->right = parse_expression();
+      return modulo;
+    }
   default: return factor;
   }
 }
 
-auto Parser::parse_factor() -> Operation *
+auto Parser::parse_factor() -> Node *
 {
   if (empty()) {
     std::cerr << "Error: no more tokens to parse" << std::endl;
@@ -170,17 +178,17 @@ auto Parser::parse_factor() -> Operation *
   }
 }
 
-auto Parser::parse() -> std::unique_ptr<Operation>
+auto Parser::parse() -> std::unique_ptr<Node>
 {
   auto expr = parse_expression();
   if (!empty()) {
     std::cerr << "Unexpected token at: " << peek().position << std::endl;
     std::exit(EXIT_FAILURE);
   }
-  return std::unique_ptr<Operation>(expr);
+  return std::unique_ptr<Node>(expr);
 }
 
-auto evaluate(const std::unique_ptr<Operation> &opr) -> double
+auto evaluate(const std::unique_ptr<Node> &opr) -> double
 {
   if (opr) return opr->evaluate();
   else {

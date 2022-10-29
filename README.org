@@ -2,7 +2,21 @@
 #+AUTHOR: Pushkar Raj
 #+EMAIL: px86@protonmail.com
 
-Reads mathematical expressions from =stdin= and prints the result to =stdout=. Can be used within shell-scripts for shells like =bash=, where floating point arithmetic is not possible.
+Reads mathematical expressions from =stdin= and prints the result to =stdout=. It can be used within shell-scripts for shells like =bash=, where floating point arithmetic is not possible. All numbers (integers, floats etc.) are converted to a 64 bit floating point number, so be mindful of precision issues.
+
+* Compilation
+
+Assuming that you have =gnumake= installed and are in the project root.
+
+#+begin_src shell
+  make
+#+end_src
+
+* Usage
+
+#+begin_src shell
+  echo "100*(8-12/2)" | ./bmee
+#+end_src
 
 * Note
-I wrote this to practice writing a basic recursive descent parser.
+- It is implemented using a recursive descent parser.
